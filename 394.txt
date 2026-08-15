@@ -1,0 +1,51 @@
+class Solution {
+    public String decodeString(String s) {
+        int left = 0;
+        Stack<Character> st = new Stack<>();
+        String res = "";
+        while(left<s.length()){
+           
+            String s1 = "";
+            while(left<s.length() && s.charAt(left)!=']'){
+                st.push(s.charAt(left));
+                left++;
+            }
+            if(left<s.length() && s.charAt(left)==']'){
+                while(st.peek()!='['){
+                    s1+=String.valueOf(st.pop());
+                }
+                st.pop();
+            }
+            int val = 0;
+            String num = "";
+            if(Character.isDigit(st.peek())){
+                while(!st.isEmpty() && Character.isDigit(st.peek())){
+                    num += String.valueOf(st.pop());
+                }
+                for(int i=num.length()-1;i>=0;i--){
+                    val = val*10+num.charAt(i)-'0';
+                }
+                String s2 = "";
+                for(int i=0;i<val;i++){
+                    s2+=s1;
+                }
+                for(int i=s2.length()-1;i>=0;i--){
+                    st.push(s2.charAt(i));
+                }
+                
+                
+            }
+            
+            left++;
+            
+        }
+        while(!st.isEmpty()){
+            res+=String.valueOf(st.pop());
+        }
+        String result = "";
+        for(int i=res.length()-1;i>=0;i--){
+            result+=res.charAt(i);
+        }
+        return result;
+    }
+}
