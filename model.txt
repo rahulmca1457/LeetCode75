@@ -1,0 +1,53 @@
+# ZYRORA AI Hackathon - Plant Disease Project Blueprint
+
+### STEP 1: GET YOUR KAGGLE KEY (On Your Computer)
+1. Go to Kaggle.com, click your profile picture, and go to "Settings".
+2. Scroll down to the API section and click "Create New Token".
+3. A tiny file named `kaggle.json` will download. Keep it safe on your laptop.
+
+### STEP 2: TRAIN THE MODEL (In Google Colab)
+1. Open a new Google Colab notebook.
+2. Switch runtime to GPU: Click Menu -> Runtime -> Change runtime type -> Select "T4 GPU" -> Save.
+3. Open the built-in Gemini AI panel on the right side of Colab.
+4. Use Gemini to write and run the code for these 4 tasks sequentially:
+   - Task A: Upload `kaggle.json` and download the dataset ("vipoooool/new-plant-diseases-dataset").
+   - Task B: Load images using `tf.keras.utils.image_dataset_from_directory` resized to 224x224.
+   - Task C: Build a MobileNetV2 Transfer Learning model (weights='imagenet') with a 38-class Softmax layer.
+   - Task D: Train for 5 epochs, save as `plant_disease_model.keras`, and download it to your laptop.
+
+### STEP 3: UPLOAD MODEL TO CLOUD (On Hugging Face)
+1. Go to HuggingFace.co and create a free account.
+2. Click "New" -> "Model" to create a public repository. Name it `plant-disease-model`.
+3. Click the "Files and versions" tab and upload your `plant_disease_model.keras` file.
+4. Once uploaded, click on the file name, right-click the "download" button, and click "Copy Link Address". This is your direct model download URL.
+
+### STEP 4: SETUP CODE REPOSITORY (On Your Computer & GitHub)
+1. Create a new folder on your laptop. Inside it, create exactly three files:
+   - `app.py`: Your Flask API script. Paste your Hugging Face direct download link inside the `MODEL_URL` variable.
+   - `requirements.txt`: Paste these lines:
+     flask
+     flask-cors
+     tensorflow-cpu
+     pillow
+     numpy
+     gunicorn
+   - `render.yaml`: Paste these lines:
+     services:
+       - type: web
+         name: zyrora-plant-api
+         env: python
+         buildCommand: pip install -r requirements.txt
+         startCommand: gunicorn app:app --workers=1 --threads=2 --backlog=50
+2. Create a new public repository on GitHub.com and upload these 3 files into it.
+
+### STEP 5: GO LIVE (On Render)
+1. Go to Render.com and create a free account.
+2. Click the "New +" button and select "Web Service".
+3. Connect your GitHub account and choose your plant disease project repository.
+4. Click "Deploy". Render automatically reads your `render.yaml` file, installs the packages, pulls your model from Hugging Face into memory, and gives you a live API web link!
+
+
+Prompt 1: For downloading the dataset via Kaggle APIOpen the Gemini panel in Colab and paste this:Prompt: "Write a Python code block for Google Colab to upload a kaggle.json file, move it to the correct hidden directory (~/.kaggle/), change its permissions for security, and use the Kaggle CLI to download and extract the dataset vipoooool/new-plant-diseases-dataset into the /content/ folder. Delete the downloaded zip file afterward to save disk space."
+Prompt 2: For creating the data pipelineOnce your dataset is unzipped, paste this:Prompt: "Write TensorFlow/Keras code to load the training and validation images from /content/New Plant Diseases Dataset(Augmented)/New Plant Diseases Dataset/train and valid. Use tf.keras.utils.image_dataset_from_directory. Set the image size to (224, 224), batch size to 32, and label mode to categorical. Print out the exact list of class names so I can save them for my Flask API later."
+Prompt 3: For building the MobileNetV2 modelBefore you build your architecture, paste this:Prompt: "Write Keras code to build an image classification model using Transfer Learning. Load MobileNetV2 with weights='imagenet' and include_top=False. Freeze all layers of this base model. Add a GlobalAveragePooling2D layer, a Dropout layer of 0.2 to prevent overfitting, and a final Dense layer with 38 outputs using a softmax activation function. Compile the model using the Adam optimizer and categorical_crossentropy loss."
+Prompt 4: For training and saving the .keras fileWhen you are ready to train, paste this:Prompt: "Write code to train the compiled model for 5 epochs using the training and validation datasets. After training completes, include the code to save the final model strictly in the modern .keras format as plant_disease_model.keras. Finally, include the google.colab.files.download script to automatically trigger a download of the saved model file to my local laptop."
